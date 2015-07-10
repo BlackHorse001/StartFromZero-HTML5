@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Canvas 基础</title>
+</head>
+<body>
+<div style="width:800px; height:800px;border:1px solid;">
+	<!-- default w:300px  h:150px -->
+	<canvas id="canvas" width="500px" height="500px" style="border:1px solid;"></canvas>
+</div>
+
+<script type="text/javascript">
+	var canvas = document.getElementById("canvas");
+	//获取CanvasRendringContext2D对象
+	var ctx = canvas.getContext("2d");
+	/**
+	* 绘制几何图形
+	*/
+	//设置填充颜色
+	ctx.fillStyle="#eee";
+	//绘制填充矩形
+	ctx.fillRect(50, 0, 200, 30); 
+	//--------------------------------
+	ctx.lineWidth = 5;
+	//设置填充颜色
+	ctx.strokeStyle="#abc";
+	//设置线条宽度
+	ctx.lineJoin = "round";
+	//绘制矩形边框
+	ctx.strokeRect(10,40,100,100);
+	//--------------------------------
+	//设置线条颜色 
+	ctx.strokeStyle="#00f";
+	//设置线条宽度
+	ctx.lineJoin = "bevel"
+	//绘制一个矩形边框
+	ctx.strokeRect(140,40,100,100);
+	//--------------------------------
+	ctx.strokeStyle = "rgba(255,0,0,0.2)";
+	ctx.lineJoin = "meter";
+	ctx.strokeRect(280,40,100,100);
+	//--------------------------------	
+ 	ctx.clearRect(50, 60, 300, 40);
+ 	//*********************************************************************
+ 	/**
+	* 绘制字符串
+	*/
+	ctx.font = "20px 微软雅黑";
+ 	ctx.fillStyle = "rgba(255,0,0,0.4)";
+ 	ctx.textBaseline = "top";
+ 	ctx.fillText("你好，世界", 10, 160 );
+ 	//--------------------------------
+ 	ctx.lineWidth = 1;
+ 	ctx.font = "italic 20px 微软雅黑";
+ 	ctx.strokeStyle = "rgba(0,255,0,0.7)";
+ 	ctx.strokeText("你好，世界", 10, 190);
+ 	//--------------------------------------
+ 	//*********************************************************************
+ 	/**
+	* 设置阴影
+	*/
+	ctx.shadowBlur = 10.4;
+ 	ctx.shadowColor = "#ff00ff";
+ 	ctx.shadowOffsetX = 10;
+ 	ctx.shadowOffsetY = 5;
+	ctx.font = "20px 微软雅黑";
+ 	ctx.fillStyle = "rgba(255,0,0,0.4)";
+ 	ctx.textBaseline = "top";
+ 	ctx.fillText("你好，世界", 10, 220 );
+	
+ 	//*********************************************************************
+ 	/**
+	* 使用路径
+	* 1 调用CanvasRenderingContext2D 的beginPath方法开始定义路径
+	* 2 调用CanvasRenderingContext2D 的各种方法添加子路径
+	* 3 调用CanvasRenderingContext2D 的closePath方法结束路径
+	* 4 调用CanvasRenderingContext2D 的fill或stroke方法填充
+	*/
+	
+ 	
+</script>
+</body>
+</html>

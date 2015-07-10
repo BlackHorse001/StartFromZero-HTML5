@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>File Upload</title>
+<script type="text/javascript">
+	function showMsg(obj){
+		//var file = document.getElementById("file1");
+		
+		var fileList = obj.files;
+		var str = "";
+		for(var i=0, len=fileList.length; i<len; i++){
+			str += "<ul>"
+			str += "<li>file name:" + fileList[i].name + "</li>";
+			str	+= "<li>file type:" + fileList[i].type + "</li>";
+			str += "<li>file size:" + fileList[i].size + "</li>"
+			str += "</ul>"
+		}
+		document.getElementById("msg").innerHTML = str;
+	}
+	
+	var reader = null;
+	if(FileReader){
+		reader = new FileReader();
+	}else{
+		alert("浏览器不支持FileReader")
+	}
+	
+	function readText(){
+		var file = document.getElementById("file2").files[0];
+		document.getElementById("pro").max = file.size;
+		reader.readAsText(file, "utf-8");
+	}
+	function readBinary(){
+		var file = document.getElementById("file2").files[0];
+		document.getElementById("pro").max = file.size;
+		reader.readAsBinaryString(file);
+	}
+	function readDataURL(){
+		var file = document.getElementById("file2").files[0];
+		document.getElementById("pro").max = file.size;
+		reader.readAsDataURL(file);
+	}
+	reader.onload = function(){
+		document.getElementById("result").innerHTML = reader.result;
+	}
+	reader.onerror = function(){
+		document.getElementById("result").innerHTML = reader.result;
+	}
+	reader.onprogress = function(evt){
+		document.getElementById("pro").value = evt.loaded;
+	}
+</script>
+</head>
+<body>
+<form action="HTML5Upload" method="post">
+	<input id="file1" name="file1" type="file" accept=".doc,.docx,.txt" multiple="multiple" onchange="showMsg(this)"/><br />
+	<input id="file2" name="file2" type="file" onchange="showMsg(this)"/>
+	<input type="button" value="ReadAsText" onclick="readText()"/>
+	<input type="button" value="ReadAsBinary" onclick="readBinary()"/>
+	<input type="button" value="ReadAsDataURL" onclick="readDataURL()"/> <br />
+	<progress id="pro" value="0" ></progress>
+</form>
+<div id="msg"></div>
+<div id="result"></div>
+</body>
+</html>

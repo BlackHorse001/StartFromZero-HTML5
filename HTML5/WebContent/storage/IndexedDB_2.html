@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Indexed DB Test</title>
+<style type="text/css">
+	tr,td,th{
+		border:1px solid;
+	}
+</style>
+</head>
+<body>
+<label>用户名:</label><input type="text" name="username" id="username"/> <br />
+<label>邮箱:</label><input type="text" name="email" id="email" /> <br />
+<input type="hidden" name="id" value="" id="_id"/>
+<input type="button" value="save" onclick="_save()"/>
+<input type="button" value="showAll" onclick="_showAll()" />
+<input type="button" value="update" onclick="_update()" />
+<input type="button" value="delete db" onclick="_deleteDB()" />
+
+<table id="_table">
+	<tr>
+		<th>编号</th>
+		<th>用户名</th>
+		<th>邮箱</th>
+		<th>操作</th>
+	</tr>
+</table>
+<script type="text/javascript">
+	var db;
+	var dbName = "MyDB";
+	var version = 1;
+	var dbStoreName = "T_USER";
+	//兼容浏览器
+	window.indexedDB = window.indexedDB || window.mozIndexedDB
+		|| window.webkitIndexedDB || window.msIndexedDB;
+	if(window.indexedDB){
+		
+		var request = window.indexedDB.open(dbName, version);
+		
+		request.onerror = function(e){
+			showError("open db error: ", e);
+		}
+		request.onsuccess = function(e){
+			console.log("open db success");
+			db = e.target.result;
+		}
+		request.onupgradeneeded = function(e){
+			console.log("db upgrade");
+			db = e.target.result;
+			if(!db.objectStoreNames.contains(dbStoreName)){
+				var store = db.createObjectStore(dbStoreName, {keypath: "id", autoIncrement: true });
+				//params: index name, column name, isUnque
+				store.createIndex("Index_email", "email", {unique: true});
+			}
+		}
+		request.onblocked = function(e){
+			console.log(e);
+		}
+	}else{
+		alert("Your browser doesn't support indexedDB");
+	}
+	
+	/**
+	* 添加数据
+	*/
+	function _save(){
+		if(db){
+			var username = document.getElementById("username").value;
+			var email = document.getElementById("email").value;
+			var user = {username: username, email: email};
+			
+			var request = db.transaction(dbStoreName, "readwrite")
+								.objectStore(dbStoreName)
+								.add(user);
+			
+			request.onerror = function(e){
+				showError("add error: ", e);
+			}
+			request.onsuccess = function(e){
+				console.log("add success");
+			}
+		}
+	}
+	
+	/**
+	* 通过游标遍历数据
+	*/
+	function _showAll(){
+		if(db){
+			var store = db.transaction(dbStoreName, "readonly")
+								.objectStore(dbStoreName);
+			var trs = [];
+			//打开游标
+			var request = store.openCursor();
+			request.onerror = function(e){
+				showError("query error: ", e)
+			}
+			
+			request.onsuccess = function(e){
+				var cursor = e.target.result;
+				if(cursor){
+					console.log(cursor.value.username + "," + cursor.value.email);
+					var user = cursor.value;
+					var tr = document.createElement("tr");
+					var td1 = document.createElement("td");
+					td1.innerHTML = cursor.key;
+					var td2 = document.createElement("td");
+					td2.innerHTML = user.username;
+					var td3 = document.createElement("td");
+					td3.innerHTML = user.email;
+					tr.appendChild(td1);
+					tr.appendChild(td2);
+					tr.appendChild(td3);
+					tr.appendChild(buildOperateButtons(cursor.key));
+					trs.push(tr);
+					cursor.continue();
+				}else{
+					if(trs.length > 0){
+						var tabObj = document.getElementById("_table");
+						for(var i=1; i<tabObj.rows.length; i++){
+							tabObj.removeChild(tabObj.rows[i]);
+						}
+						for(var i=0; i<trs.length; i++){
+							tabObj.appendChild(trs[i]);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	* 根据primary key删除数据
+	*/
+	function _delete(key, obj){
+		var request = db.transaction(dbStoreName, "readwrite")
+						.objectStore(dbStoreName)
+						.delete(key);
+		request.onsuccess = function(e){
+			var parentTr = obj.parentNode.parentNode;
+			var parentTable = parentTr.parentNode;
+			parentTable.removeChild(parentTr);
+			console.log("delete success");
+		}
+		
+		request.onerror = function(e){
+			showError("delete error: " + e);
+		}
+	}
+	
+	/**
+	* 查询数据，并显示出来，以待修改
+	*/
+	function _modify(key, modBtn){
+		
+		var request = db.transaction(dbStoreName, "readwrite")
+						.objectStore(dbStoreName)
+						.get(key);
+		
+		request.onsuccess = function(e){
+			var result = e.target.result;
+			document.getElementById("username").value = result.username;
+			document.getElementById("email").value = result.email;
+			document.getElementById("_id").value = key;
+		}
+		
+		request.onerror = function(e){
+			showError("", e);
+		}
+	}
+	
+	/**
+	* 更新数据
+	*/
+	function _update(){
+		
+		var _id = document.getElementById("_id").value;
+		if(_id.length>0){
+			var store = db.transaction(dbStoreName, "readwrite")
+							.objectStore(dbStoreName);
+			
+			store.get(Number(_id)).onsuccess = function(e){
+				var user = e.target.result;
+				user.username = document.getElementById("username").value;
+				user.email = document.getElementById("email").value;
+				var request = store.put(user);
+				request.onsuccess = function(e){
+					console.log("update success");
+				}
+				request.onerror = function(e){
+					console.log("update error: " + e);
+				}
+			}
+			store.get(Number(_id)).onerror = function(e){
+				console.log("get record fail: " + e);
+			}
+		}
+	}
+	/**
+	* 删除数据
+	*/
+	function _deleteDB(){
+		window.indexedDB.deleteDatabase(dbName);
+    }
+	
+	function buildOperateButtons(key){
+		var td = document.createElement("td");
+		var delBtn = document.createElement("input");
+		delBtn.type = "button";
+		delBtn.value = "删除";
+		delBtn.onclick = function(){_delete(key, delBtn)};
+		var modBtn = document.createElement("input");
+		modBtn.type="button";
+		modBtn.value = "修改";
+		modBtn.onclick = function(){_modify(key, modBtn)};
+		td.appendChild(delBtn);
+		td.appendChild(modBtn);
+		return td;
+	}
+	
+	function showError(errMsg, e){
+		console.log(errMsg + e.target.error.message);
+	}
+</script>
+</body>
+</html>

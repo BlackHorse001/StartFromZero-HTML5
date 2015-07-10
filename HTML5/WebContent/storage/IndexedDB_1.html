@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IndexedDB</title>
+<style type="text/css">
+table {
+	width: 30%;
+	text-align: center;
+}
+
+tr,td,th {
+	border: 1px solid;
+}
+</style>
+</head>
+<script type="text/javascript">
+	
+	window.indexedDB = window.indexedDB || window.mozIndexedDB
+			|| window.webkitIndexedDB || window.msIndexedDB;
+	if (!window.indexedDB) {
+		alert("Your brower does not support IndexedDB");
+	}
+	var db;
+	var request = window.indexedDB.open("DB", 4);
+	request.onerror = function(e) {
+		console.log("open error: " + e.target.error.message);
+	};
+	request.onsuccess = function(e) {
+		console.log("open success");
+		db = e.target.result;
+	};
+	request.onupgradeneeded = function(e) {
+		console.log("open upgrade");
+		db = e.target.result;
+		if (!db.objectStoreNames.contains("user")) {
+			var objStore = db.createObjectStore("user", {
+				keyPath : "id"
+			});
+			console.log("create object store success");
+		}
+	};
+
+	/**
+	 * get object store
+	 */
+	function getObjectStore(storeName) {
+		if (!db.objectStoreNames.contains(storeName)) {
+			console.log("Object store " + storeName + " doesn't not exist");
+			return null;
+		} else {
+			return db.transaction(storeName, "readwrite")
+					.objectStore(storeName);
+		}
+	}
+
+	/**
+	 * save object
+	 */
+	function _save(storeName, obj) {
+		var objStore = getObjectStore(storeName);
+		if (null == objStore) {
+			return;
+		}
+		var request = objStore.add(obj);
+		request.onsuccess = function(e) {
+			console.log("save success");
+		};
+		request.onerror = function(e) {
+			console.log("save fail: " + e.target.error.message);
+		}
+	}
+
+	/**
+	 * update object
+	 */
+	function _update(storeName, obj) {
+		var objStore = getObjectStore(storeName);
+		if (null == objStore) {
+			return;
+		}
+		var request = objStore.put(obj);
+		request.onsuccess = function(e) {
+			console.log("update successfully");
+		};
+		request.onerror = function(e) {
+			console.log("update fail: " + e.target.error.message);
+		}
+	}
+
+	/**
+	 * load object
+	 */
+	function _loadObject(storeName, id) {
+		var objStore = getObjectStore(storeName);
+		if (null == objStore) {
+			return;
+		}
+		
+		var request = objStore.get(id);
+		return request;
+	}
+
+	/**
+	* delete object
+	*/
+	function _deleteObject(storeName, id){
+		var objStore = getObjectStore(storeName);
+		if (null == objStore) {
+			return;
+		}
+		var request = objStore.delete(id);
+		request.onsuccess = function(e){
+			console.log("delete success");
+		}
+		request.onerror = function(e){
+			console.log("delete fail: " + e.target.message);
+		}
+	}
+
+	/**
+	 * delete object store
+	 * this function can only be called in onupgradeneeded function
+	 */
+	function _deleteObjectStore(storeName) {
+		try {
+			if (db.objectStoreNames.contains(storeName)) {
+				db.deleteObjectStore(storeName);
+				console.log("delete object store success");
+			}
+		} catch (e) {
+			console.log("delete object store fail: " + e);
+		}
+	}
+
+	/**
+	 * delete Database
+	 */
+	function _deleteDB(dbName) {
+		request = window.indexedDB.deleteDatabase(dbName);
+		request.onsuccess = function(e) {
+			console.log("delete database " + dbName + " success");
+		};
+		request.onerror = function(e) {
+			console.log("delete database " + dbName + " fail: "
+					+ e.target.error.message);
+		};
+	}
+
+	var typeArr = [ "text", "select-one", "textarea" ];
+	function getFormJson(exceptArr) {
+		var sJson = "[";
+		var fObj = document.getElementById("form");
+		if (!fObj) {
+			return;
+		}
+		for (var i = 0, len = fObj.length; i < len; i++) {
+			var ele = fObj[i];
+			var type = ele.type;
+			var id = ele.id;
+			var value = ele.value;
+			if (exceptArr && exceptArr.indexOf(id) > -1) {
+				continue;
+			}
+			if (typeArr.indexOf(type) > -1) {
+				sJson += "{'id':'" + id + "', 'value':'" + value + "'},";
+				//sJson += "{\"id\":\"" + id + "\", \"value\":\"" + value +"\"},";
+			}
+		}
+		sJson = sJson.substring(0, sJson.length - 1);
+		sJson += "]";
+		console.log("jsonString : " + sJson);
+		return sJson;
+		/* var jsonObj = eval(sJson);
+		return jsonObj; */
+	}
+	
+	function saveUser(){
+		var id = document.getElementById("id").value;
+		var obj = {id:id, value: getFormJson()};
+		_save("user", obj);
+		insertRow(obj.value,id);
+	}
+	
+	function updateUser(){
+		var obj = {id:document.getElementById("id").value, value: getFormJson()};
+		_update("user", obj);		
+	}
+	function deleteUser(key){
+		_deleteObject("user", key);
+		deleteRow(key);
+	}
+	function loadUser(){
+		var request = _loadObject("user","1");
+		request.onsuccess = function(e) {
+			console.log("load success");
+			var jsonObj = eval(e.target.result.value);
+			for(var i=0, len=jsonObj.length; i<len; i++){
+				var json = jsonObj[i];
+				console.log(json.id + ":" + json.value);
+				document.getElementById(json.id).value = json.value;
+			} 
+		}
+		request.onerror = function(e) {
+			console.log("load fail: " + e.target.error.message);
+		}
+	}
+	function loadUsers(){
+		 var parent = document.getElementById("table");
+	     for(var i=parent.rows.length-1;i>0; i--){
+	    	 parent.deleteRow(i);
+     	 } 
+		var objStore = db.transaction("user", "readwrite")
+		.objectStore("user");//getObjectStore("user");
+		if (null == objStore) {
+			return;
+		}
+	     var request=objStore.openCursor();
+	     request.onsuccess=function(e){
+	    	 console.log("success");
+	         var cursor=e.target.result;
+	         if(cursor){
+	        	insertRow(cursor.value.value, cursor.value.id);
+	            cursor.continue();
+	         }
+	     };
+	     request.onerror=function(e){
+	    	 console.log("fail" + e.target.error.message);
+	     }
+	}
+	
+	function insertRow(jsonStr, id){
+		var jsonObj = eval(jsonStr);
+		var parent = document.getElementById("table");
+		var th = parent.insertRow(-1);
+		th.setAttribute("id", id);
+		for(var i=0, len=jsonObj.length; i<len; i++){
+			var td = document.createElement("td");
+			td.innerText = jsonObj[i].value;
+			th.appendChild(td);
+		}
+		var td = document.createElement("td");
+		td.innerHTML = "<input type='button' value='delete' onclick='deleteUser(\""+ id + "\")' />";
+		th.appendChild(td);
+	}
+	
+	function deleteRow(id){
+		document.getElementById(id).remove();
+	}
+</script>
+<body>
+	<form id="form">
+		<label for="id">id</label><br /> <input type="text" name="id" id="id" />
+		<br /> <label for="username">username</label> <br /> <input
+			type="text" name="username" id="username" /> <br /> <label
+			for="email">email</label><br /> <input type="text" name="email"
+			id="email" /> <br /> <input type="button" value="save"
+			onclick="saveUser()" /> <input type="button" value="saveOrupdate"
+			onclick="updateUser()" /> <input type="button" value="load"
+			onclick="loadUser()" /> <br /> <input type="button"
+			value="deleteDB" onclick="_deleteDB('DB')" /> <input type="button"
+			value="getFormData" onclick="getFormJson()" /> <input type="button"
+			value="loadAllUser" onclick="loadUsers()" />
+	</form>
+	<hr />
+	<table id="table" style="border: 1px solid">
+		<tr>
+			<th>id</th>
+			<th>username</th>
+			<th>email</th>
+			<th>operate</th>
+		</tr>
+	</table>
+</body>
+</html>

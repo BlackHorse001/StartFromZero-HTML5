@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>基本表单元素</title>
+<script type="text/javascript">
+	function _getSubmit(){
+		var mform = document.forms[0];
+		mform.method="GET";
+		mform.action = mform.action+"?flag=11111";
+		mform.submit();
+	}
+	function _postSubmit(){
+		var mform = document.forms.mForm;
+		mform.method="POST";
+		mform.action = mform.action+"?flag=11111";
+		mform.enctype="application/x-www-form-urlencoded";
+		mform.submit();
+	}
+</script>
+</head>
+<body>
+<form name="mForm" action="01_form_base.html" >
+<!--  
+	<input type="image" name="image" src="../img/w3school_banner.gif"/>
+-->
+
+	<input type="text" name="username" value="abc" />
+	<input type="password" name="password" value="12121212" />
+	
+	<input type="button" name="getSubmit" value="get提交" onclick="_getSubmit()"/>
+	<input type="button" name="postSubmit" value="post提交" onclick="_postSubmit()"/>
+</form>
+</body>
+</html>

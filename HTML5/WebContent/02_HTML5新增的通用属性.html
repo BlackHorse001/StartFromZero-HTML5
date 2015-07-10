@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>HTML5新增的通用属性</title>
+  <script type="text/javascript">
+	function divOnclick(obj){
+		obj.contentEditable="true"
+	}
+	function getHTML(){
+		var val = document.getElementById("mDiv").innerHTML;
+		alert(":"+val+":"+val.length);
+	}
+  </script>
+ </head>
+ <body>
+  <h3>contentEditable属性</h3>
+  <div id="mDiv" onclick="divOnclick(this)" style="width:200px;height:200px; border:1px solid"></div>
+  <input type="button" value="innerHTML" onclick="getHTML()" />
+
+  <hr/>
+  <h3>designMode属性</h3>
+  <p>designMode属性相当于一个全局的contentEditable属性，如果把整个页面的designMode属性设为on时，该页面上所有课支持contentEditable属性的元素都变成可编辑状态</p>
+
+  <h3>hidden属性</h3>
+  <p>所有元素都有一个hidden属性，支持true和false，当hidden为true时，不显示该组件，也不会保留该组件所占用的空间</p>
+
+  <h3>spellcheck属性</h3>
+  <p>为input和textarea等元素添加了spellcheck属性</p>
+  <textarea cols="20" rows="10" spellcheck="true"></textarea>
+ </body>
+</html>

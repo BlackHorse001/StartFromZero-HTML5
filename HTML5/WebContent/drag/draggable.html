@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Draggable</title>
+<style type="text/css">
+	#one{
+		width:100px;
+		height:100px;
+		background:red;
+	}
+	
+	#two{
+		width:200px;
+		height:200px;
+		border:1px solid;
+	}
+</style>
+</head>
+<body>
+<div id="one" draggable="true"></div>
+<div id="two" ></div>
+<script type="text/javascript">
+
+	var obj1 = document.getElementById("one");
+	var obj2 = document.getElementById("two");
+	
+	obj1.ondragstart = function(evt){
+		evt.dataTransfer.setData("test", evt.target.id);
+	}
+	
+	obj2.ondragover = function(evt){
+		evt.preventDefault();
+	}
+	
+	obj2.ondrop = function(evt){
+		evt.target.appendChild(document.getElementById(evt.dataTransfer.getData("test")));
+	}
+</script>
+</body>
+</html>

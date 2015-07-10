@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>Test</title>
+ </head>
+ <body>
+  <script type="text/javascript">
+	var storage = window.localStorage;
+	if(typeof(storage) != 'undefined'){
+		for(var i=0,len=storage.length; i<len; i++){
+			var key = storage.key(i);
+			document.write("[" + key + ":" + storage.getItem(key) + "] <br />")
+		}
+	}else{
+		console.log("Your brower doesn't support local storage");
+	}
+  </script>
+ </body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>Local Storage</title>
+ </head>
+ <body>
+ <input type="button" value="load" onclick="load()" /> <br />
+  <form id="form" method="post" action="www.baidu.com">
+	username<input type="text" id="username" /> <br />
+	password<input type="password" id="password" /> <br />
+	userdesc<textarea id="desc" cols="10" rows="10"> </textarea>
+	<input type="button" value="submit" onclick="_submit()"/>
+  </form>
+
+<script type="text/javascript">
+	function load(){
+		var storage = window.localStorage;
+		if(typeof(storage) != "undefined"){
+			for(var i=0, len=storage.length; i<len; i++){
+				var key = storage.key(i);
+				console.log(key);
+				var obj = document.getElementById(key);
+				if(typeof(obj)!="undefined" && null!=obj){
+					obj.value = storage.getItem(key);
+				}
+			}
+		}else{
+			console.log("your brower doesn't support local storage");
+		}
+	}
+
+	function _submit(){
+		genLocalStorage();
+		//document.forms[0].submit();
+	}
+
+	function genLocalStorage(){
+		var storage = window.localStorage;
+		if(typeof(storage) != "undefined"){
+			var fObj = document.forms[0];
+			for(var i=0, len=fObj.length; i<len; i++){
+				console.log(fObj[i].id + "," + fObj[i].type);
+				storage.setItem(fObj[i].id, fObj[i].value);
+			}
+		}else{
+			console.log("your brower doesn't support local storage");
+		}
+	}
+</script>
+ </body>
+</html>
