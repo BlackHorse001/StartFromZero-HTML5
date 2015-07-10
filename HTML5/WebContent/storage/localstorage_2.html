@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Local Storage Test</title>
+<!-- 
+<script type="text/javascript">
+	
+	var storage = window.localStorage;
+	alert(storage.getItem("user"));
+	if (storage) {
+		storage.setItem("user", "test-user");
+	} else {
+		alert("Your brower doesn't support localStorage");
+	}
+</script>
+ -->
+</head>
+<body>
+<h2>Local Storage</h2>
+<label>用户名：</label>
+	<input type="text" name="username" id="username" />
+	<input type="button" value="save" onclick="_save()" />
+	<input type="button" value="load" onclick="_load()" />
+	<input type="button" value="delete" onclick="_delete()" />
+	<input type="button" value="remove" onclick="_remove()" />
+	
+	<script type="text/javascript">
+		var storage = window.localStorage;
+		if(!storage){
+			alert("Your browser doesn't support session storage");
+		}
+		var userInputObj = document.getElementById("username");
+		
+		function _save(){
+			if(storage && userInputObj){
+				var username = userInputObj.value;
+				storage.setItem("username", username);
+			}
+		}
+		function _load(){
+			if(storage && userInputObj){
+				userInputObj.value = storage.getItem("username");
+			}
+		}
+		function _delete(){
+			if(storage){
+				console.log(storage.removeItem("username"));
+			}
+		}
+		function _remove(){
+			if(storage){
+				storage.clear();
+			}
+		}
+		window.onstorage = function(event){
+			console.log("storage 发生变化");
+		}
+	</script>
+</body>
+</html>
